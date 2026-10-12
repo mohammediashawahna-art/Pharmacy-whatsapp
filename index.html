@@ -2,8 +2,16 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة صيدليات فلسطين - إرسال واتساب</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#075e54">
+<meta name="description" content="إدارة قائمة الصيدليات الفلسطينية ومتابعة التواصل عبر WhatsApp Business">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="صيدليات فلسطين">
+<title>إدارة صيدليات فلسطين - WhatsApp Business</title>
 <style>
 :root {
   --green: #25D366;
@@ -204,6 +212,7 @@ input[type="search"] { flex: 1; min-width: 180px; }
 
 <div class="header">
   <h1>🏥 إدارة صيدليات فلسطين</h1>
+  <p style="margin:6px 12px 12px;color:#e8f5e9;font-size:.9rem">متوافق مع WhatsApp Business: ستُفتح المحادثة في التطبيق المرتبط بالرقم على جهازك. يجب أن يكون الرقم مسجّلًا في WhatsApp Business إذا أردت استخدام حساب الأعمال.</p>
   <div class="stats">
     <span id="stat-total">الإجمالي: 0</span>
     <span id="stat-sent">تم الإرسال: 0</span>
@@ -358,11 +367,14 @@ function openWhatsApp(id, prefix) {
     .replace(/\{العنوان\}/g, p.address);
 
   const phone = prefix + p.mobile;
+  // رابط واتساب الرسمي العام؛ يفتح التطبيق المرتبط بالرقم، بما فيه WhatsApp Business عند إعداده لذلك.
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 
-  // علّم كـ تم الإرسال بعد فتح الرابط
-  markStatus(id, 'sent', prefix);
+  // لا يمكن للموقع معرفة ما إذا أُرسلت الرسالة فعلًا؛ اسأل المستخدم بدل تسجيلها تلقائيًا.
+  if (confirm('هل أرسلت الرسالة فعلًا من واتساب؟ اضغط موافق لتسجيلها كمرسلة، أو إلغاء إذا لم ترسلها بعد.')) {
+    markStatus(id, 'sent', prefix);
+  }
 }
 
 function markStatus(id, status, prefix = null) {
@@ -442,8 +454,8 @@ function renderList() {
       </div>
       <div class="card-meta" style="margin-bottom:12px">📱 ${p.mobile}</div>
       <div class="card-actions">
-        <button class="btn btn-wa-ps btn-sm" onclick="openWhatsApp(${p.id}, '970')">🇵🇸 واتساب فلسطين 970</button>
-        <button class="btn btn-wa-il btn-sm" onclick="openWhatsApp(${p.id}, '972')">🇮🇱 واتساب إسرائيل 972</button>
+        <button class="btn btn-wa-ps btn-sm" onclick="openWhatsApp(${p.id}, '970')">🇵🇸 فتح واتساب 970</button>
+        <button class="btn btn-wa-il btn-sm" onclick="openWhatsApp(${p.id}, '972')">🇮🇱 فتح واتساب 972</button>
         ${p.map ? `<a class="btn btn-secondary btn-sm" href="${p.map}" target="_blank">🗺️ خريطة</a>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="markStatus(${p.id}, 'skipped')">تخطي</button>
         ${st?.status === 'sent' ? `<button class="btn btn-danger btn-sm" onclick="markStatus(${p.id}, null)">إلغاء الإرسال</button>` : ''}
@@ -497,6 +509,12 @@ document.getElementById('dailyCount').addEventListener('change', () => {
   saveState();
   updateStats();
 });
+</script>
+<script>
+// PWA: service worker enables the app shell to work offline after first visit.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('PWA service worker:', err)));
+}
 </script>
 </body>
 </html>
