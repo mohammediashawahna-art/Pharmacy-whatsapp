@@ -447,15 +447,16 @@ function openWhatsApp(id, prefix) {
     .replace(/\{المدينة\}/g, p.city)
     .replace(/\{العنوان\}/g, p.address);
 
-  const phone = prefix + p.mobile;
-  // رابط واتساب الرسمي العام؛ يفتح التطبيق المرتبط بالرقم، بما فيه WhatsApp Business عند إعداده لذلك.
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
-
-  // لا يمكن للموقع معرفة ما إذا أُرسلت الرسالة فعلًا؛ اسأل المستخدم بدل تسجيلها تلقائيًا.
-  if (confirm('هل أرسلت الرسالة فعلًا من واتساب؟ اضغط موافق لتسجيلها كمرسلة، أو إلغاء إذا لم ترسلها بعد.')) {
-    markStatus(id, 'sent', prefix);
+  const phone = String(prefix || '970') + String(p.mobile || '').replace(/\D/g, '');
+  if (!/^\d{10,15}$/.test(phone)) {
+    alert('رقم الهاتف غير صالح: ' + p.mobile);
+    return;
   }
+
+  // الانتقال المباشر إلى رابط wa.me من نقرة المستخدم أوثق على iOS من window.open،
+  // ولا يحاول فرض WhatsApp Business. واتساب يفتح المحادثة والنص جاهز؛ الإرسال النهائي يدوي.
+  const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+  window.location.href = url;
 }
 
 
