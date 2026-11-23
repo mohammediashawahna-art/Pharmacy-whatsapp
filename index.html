@@ -443,7 +443,7 @@ function openWhatsAppBusiness(id, prefix) {
   const p = PHARMACIES.find(x => x.id === id);
   if (!p) return;
   let msg = document.getElementById('msgTemplate').value || '';
-  msg = msg.replace(/\\{اسم_الصيدلية\\}/g,p.name).replace(/\\{المدينة\\}/g,p.city).replace(/\\{العنوان\\}/g,p.address);
+  msg = msg.replaceAll('{اسم_الصيدلية}',p.name).replaceAll('{المدينة}',p.city).replaceAll('{العنوان}',p.address);
   const phone = prefix + p.mobile;
   // Deep link attempt for WhatsApp Business. If unsupported on this device, use the regular WhatsApp button.
   window.location.href = `whatsapp-business://send?phone=${phone}&text=${encodeURIComponent(msg)}`;
