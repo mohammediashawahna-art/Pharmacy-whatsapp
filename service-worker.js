@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pharmacy-whatsapp-pwa-v2';
+const CACHE_NAME = 'pharmacy-whatsapp-pwa-v3';
 const APP_SHELL = [
   './',
   './index.html',
