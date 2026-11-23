@@ -206,13 +206,52 @@ input[type="search"] { flex: 1; min-width: 180px; }
   .card-actions { flex-direction: column; }
   .btn { width: 100%; justify-content: center; }
 }
+
+/* PALDOSE outreach UI refresh */
+:root{--green:#087f5b;--green-dark:#075e49;--bg:#f4f7f6;--border:#e3ebe7;--text:#172b25;--muted:#71817a;--card:#fff}
+body{background:linear-gradient(180deg,#eaf4ef 0,#f6f8f7 260px);color:var(--text);line-height:1.65}
+.header{padding:22px max(18px,calc((100% - 1080px)/2));background:linear-gradient(125deg,#087f5b,#064c43);box-shadow:0 8px 24px #064c4326}
+.header h1{font-size:1.45rem;letter-spacing:-.3px}
+.header>p{max-width:780px;margin:8px 0 14px!important;line-height:1.7}
+.header .stats{gap:9px;margin-top:14px}
+.header .stats span{background:#ffffff1c;border:1px solid #ffffff26;padding:7px 13px;font-weight:600}
+.container{max-width:1080px;padding:22px 18px}
+.section{border:1px solid #e7eeea;border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 5px 20px #183b2b0a}
+.section-title{font-size:1.08rem;color:#087653;margin-bottom:16px}
+textarea.template{min-height:145px;border:1px solid #dce7e1;border-radius:12px;padding:15px;line-height:1.8;background:#fbfdfc;outline:none}
+textarea.template:focus,input:focus,select:focus{border-color:#15966d;box-shadow:0 0 0 3px #15966d18;outline:none}
+.controls{gap:10px}
+input[type=search],select,input[type=number]{border-radius:11px;border-color:#dfe8e3;background:#fff;min-height:42px}
+.btn{border-radius:11px;padding:10px 15px;transition:transform .16s,box-shadow .16s,background .16s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px #102b1d18}
+.btn-primary,.btn-wa-ps{background:#087f5b}
+.btn-primary:hover,.btn-wa-ps:hover{background:#066b4d}
+.btn-wa-il{background:#2878a8}
+.card{border:1px solid #e5ece8;border-radius:16px;padding:17px;margin-bottom:13px;box-shadow:0 3px 12px #193c2b08}
+.card:hover{border-color:#c5ddd0;box-shadow:0 7px 20px #193c2b10}
+.card-name{font-size:1.08rem;color:#18392c}
+.card-meta{line-height:1.7}
+.card-city{display:inline-block;background:#e8f5ee;color:#08734f;padding:4px 11px}
+.status-badge{display:inline-block;margin-top:7px;padding:4px 9px}
+.card-actions{gap:9px}
+.tabs{background:#e7efea;border-radius:13px;padding:5px;gap:5px}
+.tab{border-radius:10px;padding:11px 8px}
+.tab.active{color:#087653;box-shadow:0 2px 8px #173b2914}
+.progress-bar{height:10px;border-radius:20px;background:#e5eee9}
+.progress-fill{border-radius:20px;background:linear-gradient(90deg,#10a875,#087653)}
+.empty{background:#fff;border:1px dashed #cbdad1;border-radius:16px;margin:10px 0}
+.footer-note{padding:24px 10px}
+#promoPreview{box-shadow:0 4px 14px #173b2914}
+@media(min-width:760px){#listContainer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}#listContainer .card{margin:0;min-width:0}.card-actions .btn{flex:1;justify-content:center}}
+@media(max-width:600px){.header{padding:18px 16px}.header h1{font-size:1.2rem}.container{padding:14px 12px}.section{padding:15px;border-radius:15px}.header .stats{gap:7px}.header .stats span{font-size:.78rem;padding:6px 9px}.card{padding:14px}.card-actions{display:grid;grid-template-columns:1fr 1fr}.card-actions .btn{width:100%;font-size:.78rem;padding:9px 7px}.tabs .tab{font-size:.82rem;padding:9px 4px}}
+
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>🏥 إدارة صيدليات فلسطين</h1>
-  <p style="margin:6px 12px 12px;color:#e8f5e9;font-size:.9rem">متوافق مع WhatsApp Business: ستُفتح المحادثة في التطبيق المرتبط بالرقم على جهازك. يجب أن يكون الرقم مسجّلًا في WhatsApp Business إذا أردت استخدام حساب الأعمال.</p>
+  <p style="margin:6px 0 12px;color:#e8f5e9;font-size:.9rem">إدارة التواصل مع الصيدليات الفلسطينية — اختر WhatsApp Business للمحاولة المباشرة، أو واتساب العادي كخيار بديل.</p>
   <div class="stats">
     <span id="stat-total">الإجمالي: 0</span>
     <span id="stat-sent">تم الإرسال: 0</span>
@@ -399,6 +438,20 @@ function openWhatsApp(id, prefix) {
   }
 }
 
+
+function openWhatsAppBusiness(id, prefix) {
+  const p = PHARMACIES.find(x => x.id === id);
+  if (!p) return;
+  let msg = document.getElementById('msgTemplate').value || '';
+  msg = msg.replace(/\\{اسم_الصيدلية\\}/g,p.name).replace(/\\{المدينة\\}/g,p.city).replace(/\\{العنوان\\}/g,p.address);
+  const phone = prefix + p.mobile;
+  // Deep link attempt for WhatsApp Business. If unsupported on this device, use the regular WhatsApp button.
+  window.location.href = `whatsapp-business://send?phone=${phone}&text=${encodeURIComponent(msg)}`;
+  setTimeout(() => {
+    alert('إذا لم يفتح WhatsApp Business، استخدم زر «فتح واتساب» العادي. لا تسمح أنظمة iOS للموقع بضمان اختيار تطبيق معيّن على كل الأجهزة.');
+  }, 900);
+}
+
 async function sharePromo() {
   const message = document.getElementById('msgTemplate').value || '';
   const imageUrl = new URL('assets/paldose-promo.png', window.location.href).href;
@@ -496,8 +549,8 @@ function renderList() {
       </div>
       <div class="card-meta" style="margin-bottom:12px">📱 ${p.mobile}</div>
       <div class="card-actions">
-        <button class="btn btn-wa-ps btn-sm" onclick="openWhatsApp(${p.id}, '970')">🇵🇸 فتح واتساب 970</button>
-        <button class="btn btn-wa-il btn-sm" onclick="openWhatsApp(${p.id}, '972')">🇮🇱 فتح واتساب 972</button>
+        <button class="btn btn-wa-ps btn-sm" onclick="openWhatsAppBusiness(${p.id}, '970')">🟢 Business 970</button>
+        <button class="btn btn-wa-il btn-sm" onclick="openWhatsAppBusiness(${p.id}, '972')">🟢 Business 972</button>
         ${p.map ? `<a class="btn btn-secondary btn-sm" href="${p.map}" target="_blank">🗺️ خريطة</a>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="markStatus(${p.id}, 'sent')">تخطي / إنهاء</button>
         ${st?.status === 'sent' ? `<button class="btn btn-danger btn-sm" onclick="markStatus(${p.id}, null)">إلغاء الإرسال</button>` : ''}
