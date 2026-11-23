@@ -535,6 +535,7 @@ function initCities() {
 }
 
 loadState();
+saveState(); // احفظ ترحيل حالات التخطي القديمة فورًا.
 initCities();
 updateStats();
 if (state.todayIds.length === 0) {
