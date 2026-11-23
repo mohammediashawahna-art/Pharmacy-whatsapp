@@ -251,7 +251,7 @@ input[type=search],select,input[type=number]{border-radius:11px;border-color:#df
 
 <div class="header">
   <h1>🏥 إدارة صيدليات فلسطين</h1>
-  <p style="margin:6px 0 12px;color:#e8f5e9;font-size:.9rem">إدارة التواصل مع الصيدليات الفلسطينية — اختر WhatsApp Business للمحاولة المباشرة، أو واتساب العادي كخيار بديل.</p>
+  <p style="margin:6px 0 12px;color:#e8f5e9;font-size:.9rem">إدارة التواصل مع الصيدليات الفلسطينية ومتابعة الرسائل بسهولة.</p>
   <div class="stats">
     <span id="stat-total">الإجمالي: 0</span>
     <span id="stat-sent">تم الإرسال: 0</span>
@@ -439,19 +439,6 @@ function openWhatsApp(id, prefix) {
 }
 
 
-function openWhatsAppBusiness(id, prefix) {
-  const p = PHARMACIES.find(x => x.id === id);
-  if (!p) return;
-  let msg = document.getElementById('msgTemplate').value || '';
-  msg = msg.replaceAll('{اسم_الصيدلية}',p.name).replaceAll('{المدينة}',p.city).replaceAll('{العنوان}',p.address);
-  const phone = prefix + p.mobile;
-  // Deep link attempt for WhatsApp Business. If unsupported on this device, use the regular WhatsApp button.
-  window.location.href = `whatsapp-business://send?phone=${phone}&text=${encodeURIComponent(msg)}`;
-  setTimeout(() => {
-    alert('إذا لم يفتح WhatsApp Business، استخدم زر «فتح واتساب» العادي. لا تسمح أنظمة iOS للموقع بضمان اختيار تطبيق معيّن على كل الأجهزة.');
-  }, 900);
-}
-
 async function sharePromo() {
   const message = document.getElementById('msgTemplate').value || '';
   const imageUrl = new URL('assets/paldose-promo.png', window.location.href).href;
@@ -549,8 +536,8 @@ function renderList() {
       </div>
       <div class="card-meta" style="margin-bottom:12px">📱 ${p.mobile}</div>
       <div class="card-actions">
-        <button class="btn btn-wa-ps btn-sm" onclick="openWhatsAppBusiness(${p.id}, '970')">🟢 Business 970</button>
-        <button class="btn btn-wa-il btn-sm" onclick="openWhatsAppBusiness(${p.id}, '972')">🟢 Business 972</button>
+        <button class="btn btn-wa-ps btn-sm" onclick="openWhatsApp(${p.id}, '970')">🟢 فتح واتساب 970</button>
+        <button class="btn btn-wa-il btn-sm" onclick="openWhatsApp(${p.id}, '972')">🟢 فتح واتساب 972</button>
         ${p.map ? `<a class="btn btn-secondary btn-sm" href="${p.map}" target="_blank">🗺️ خريطة</a>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="markStatus(${p.id}, 'sent')">تخطي / إنهاء</button>
         ${st?.status === 'sent' ? `<button class="btn btn-danger btn-sm" onclick="markStatus(${p.id}, null)">إلغاء الإرسال</button>` : ''}
