@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pharmacy-whatsapp-pwa-v1';
+const CACHE_NAME = 'pharmacy-whatsapp-pwa-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -23,6 +23,20 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  // Always check the network first for page navigations so updated buttons/scripts
+  // are not trapped behind an older installed PWA cache.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+        }
+        return response;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
   event.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;
