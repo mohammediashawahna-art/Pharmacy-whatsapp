@@ -226,11 +226,23 @@ input[type="search"] { flex: 1; min-width: 180px; }
   <!-- قالب الرسالة -->
   <div class="section">
     <div class="section-title">📝 قالب الرسالة (إعلان بلدوز)</div>
-    <textarea class="template" id="msgTemplate" placeholder="اكتب هنا نص الإعلان... يمكنك استخدام: {اسم_الصيدلية} {المدينة} {العنوان}">السلام عليكم ورحمة الله،
-معكم [اسمك] من شركة بلدوز.
-نود عرض منتجاتنا على صيدلية {اسم_الصيدلية} في {المدينة}.
-هل يمكن التواصل معكم؟
-شكراً لكم.</textarea>
+    <textarea class="template" id="msgTemplate" placeholder="رسالة PALDOSE الجاهزة...">السلام عليكم 🌷
+
+أنا د. محمد شواهنة من فريق PALDOSE.
+
+ندعو صيدلية {اسم_الصيدلية} في {المدينة} لتجربة PALDOSE، المرجع الطبي للأدوية في السوق الفلسطيني.
+
+🎁 عرض خاص: 99 يومًا من الوصول اللامحدود مجانًا!
+
+أنشئوا حسابًا باسم الصيدلية عبر:
+www.paldose.help
+
+يسعدنا انضمامكم إلى PALDOSE 🤍</textarea>
+    <div class="controls" style="margin-top:10px;align-items:center">
+      <img src="assets/paldose-promo.png" alt="PALDOSE" id="promoPreview" style="width:92px;height:92px;object-fit:cover;border-radius:12px;border:1px solid var(--border,#ddd)" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:180px;font-size:.82rem;color:var(--muted)">الصورة التعريفية المرفقة مع الرسالة</div>
+      <button class="btn btn-primary btn-sm" onclick="sharePromo()">🖼️ مشاركة الصورة والرسالة</button>
+    </div>
     <div class="controls" style="margin-top:8px">
       <button class="btn btn-secondary btn-sm" onclick="saveTemplate()">💾 حفظ القالب</button>
       <span style="font-size:0.8rem;color:var(--muted)">يُحفظ تلقائياً في المتصفح</span>
@@ -281,7 +293,7 @@ const PHARMACIES = [{"id":1,"name":"صيدلية وسط البلد","city":"نا
 
 // ========== الحالة ==========
 let state = {
-  statuses: {},      // id -> {status: 'sent'|'skipped', date: '...', prefix: '970'|'972'}
+  statuses: {},      // id -> {status: 'sent', date: '...', prefix: '970'|'972'}
   todayIds: [],      // ids of today's list
   dailyTarget: 20,
   template: ''
@@ -293,6 +305,16 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state.statuses = parsed.statuses || {};
+      // ترحيل حالات التخطي القديمة لتصبح منتهية ولا تعود لقوائم التواصل.
+      Object.keys(state.statuses).forEach(id => {
+        if (state.statuses[id]?.status === 'skipped') {
+          state.statuses[id] = {
+            ...state.statuses[id],
+            status: 'sent',
+            date: state.statuses[id].date || new Date().toISOString().slice(0,10)
+          };
+        }
+      });
       state.todayIds = parsed.todayIds || [];
       state.dailyTarget = parsed.dailyTarget || 20;
       state.template = parsed.template || '';
@@ -377,6 +399,26 @@ function openWhatsApp(id, prefix) {
   }
 }
 
+async function sharePromo() {
+  const message = document.getElementById('msgTemplate').value || '';
+  const imageUrl = new URL('assets/paldose-promo.png', window.location.href).href;
+  try {
+    const response = await fetch(imageUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error('promo image missing');
+    const blob = await response.blob();
+    const file = new File([blob], 'PALDOSE-promo.png', { type: blob.type || 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+      await navigator.share({ files: [file], text: message, title: 'PALDOSE' });
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+      alert('تم فتح واتساب بالنص. أرفق صورة PALDOSE يدويًا من المحادثة.');
+    }
+  } catch (error) {
+    window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+    alert('تعذرت مشاركة الصورة تلقائيًا. أرفق صورة PALDOSE يدويًا بعد فتح واتساب.');
+  }
+}
+
 function markStatus(id, status, prefix = null) {
   state.statuses[id] = {
     status,
@@ -457,7 +499,7 @@ function renderList() {
         <button class="btn btn-wa-ps btn-sm" onclick="openWhatsApp(${p.id}, '970')">🇵🇸 فتح واتساب 970</button>
         <button class="btn btn-wa-il btn-sm" onclick="openWhatsApp(${p.id}, '972')">🇮🇱 فتح واتساب 972</button>
         ${p.map ? `<a class="btn btn-secondary btn-sm" href="${p.map}" target="_blank">🗺️ خريطة</a>` : ''}
-        <button class="btn btn-secondary btn-sm" onclick="markStatus(${p.id}, 'skipped')">تخطي</button>
+        <button class="btn btn-secondary btn-sm" onclick="markStatus(${p.id}, 'sent')">تخطي / إنهاء</button>
         ${st?.status === 'sent' ? `<button class="btn btn-danger btn-sm" onclick="markStatus(${p.id}, null)">إلغاء الإرسال</button>` : ''}
       </div>
     </div>`;
