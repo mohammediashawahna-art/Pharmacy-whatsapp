@@ -455,8 +455,8 @@ function openWhatsApp(id, prefix) {
 
   // الانتقال المباشر إلى رابط wa.me من نقرة المستخدم أوثق على iOS من window.open،
   // ولا يحاول فرض WhatsApp Business. واتساب يفتح المحادثة والنص جاهز؛ الإرسال النهائي يدوي.
-  const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
-  window.location.href = url;
+  const url = 'https://api.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(msg);
+  window.location.assign(url);
 }
 
 
